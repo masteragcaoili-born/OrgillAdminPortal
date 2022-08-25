@@ -23,9 +23,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - name: Use Node.js ${{ matrix.node-version }}
-      - run: cd orgill
-      - run: |
+      - name: go to api directory
+        run: cd orgill
+      - name: create env file
+        run: |
           touch .env
           echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} 
           echo AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} 
@@ -33,14 +34,19 @@ jobs:
           echo AWS_REGION=${{ secrets.AWS_REGION }} 
           echo PORT=${{ secrets.PORT }} 
           >> .env
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: pm2 startOrRestart ecosystem.config.js --end production
-      - run: cd ../
-      - run: cd orgill_ui
-      - run: |
+      - name: clean install npm
+        run: npm ci
+      - name: start pm2 for api
+        run: pm2 startOrRestart ecosystem.config.js --end production
+      - name: go to orgill i
+        run: cd /orgill_ui
+      - name: create env file
+        run: |
           touch .env
           echo SERVICE_BASE_URL=${{ secrets.SERVICE_BASE_URL }} >> .env
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: pm2 startOrRestart ecosystem.config.js --end production
+      - name: clean install npm
+        run: npm ci
+      - name: npm build
+        run: npm run build --if-present
+      - name: start pm2 for api
+        run: pm2 startOrRestart ecosystem.config.js --end production
