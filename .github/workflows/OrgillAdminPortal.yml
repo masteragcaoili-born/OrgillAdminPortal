@@ -1,4 +1,4 @@
-name: OrgillAdminPortal YML
+name: OrgillAdminPortal
 
 on:
   push:
