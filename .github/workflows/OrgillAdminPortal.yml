@@ -1,0 +1,45 @@
+name: OrgillAdminPortal YML
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - name: Use Node.js ${{ matrix.node-version }}
+      - run: cd orgill
+      - run: |
+          touch .env
+          echo AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} 
+          echo AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} 
+          echo AWS_CONFIG_TABLE_NAME=${{ secrets.AWS_CONFIG_TABLE_NAME }} 
+          echo AWS_REGION=${{ secrets.AWS_REGION }} 
+          echo PORT=${{ secrets.PORT }} 
+          >> .env
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: pm2 startOrRestart ecosystem.config.js --end production
+      - run: cd ../
+      - run: cd orgill_ui
+      - run: |
+          touch .env
+          echo SERVICE_BASE_URL=${{ secrets.SERVICE_BASE_URL }} >> .env
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: pm2 startOrRestart ecosystem.config.js --end production
